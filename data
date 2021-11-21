@@ -1,0 +1,53 @@
+df['month_peak_start'] = df['peak_month_start'].replace({'JANUARI':0,
+                                                   'FEBRUARI':1,
+                                                   'MARET':2,
+                                                   'APRIL':3,
+                                                   'MEI':4,
+                                                   'JUNI':5,
+                                                   'JULI':6,
+                                                   'AGUSTUS':7,
+                                                   'SEPTEMBER':8,
+                                                   'OKTOBER':9,
+                                                   'NOVEMBER':10,
+                                                   'DESEMBER':11},regex=True)
+df['month_peak_end'] = df['peak_month_end'].replace({'JANUARI':0,
+                                                   'FEBRUARI':1,
+                                                   'MARET':2,
+                                                   'APRIL':3,
+                                                   'MEI':4,
+                                                   'JUNI':5,
+                                                   'JULI':6,
+                                                   'AGUSTUS':7,
+                                                   'SEPTEMBER':8,
+                                                   'OKTOBER':9,
+                                                   'NOVEMBER':10,
+                                                   'DESEMBER':11},regex=True)
+df['province'] = df['Provinsi'].replace({'ACEH':0,'BALI':1,'BANTEN':2,'BENGKULU':3,'DAERAH ISTIMEWA YOGYAKARTA':4,
+ 'DKI JAKARTA':5,'GORONTALO':6,'JAMBI':7,'JAWA BARAT':8,'JAWA TENGAH':9,'JAWA TIMUR':10,
+ 'KALIMANTAN BARAT':11,'KALIMANTAN SELATAN':12,'KALIMANTAN TENGAH':13,'KALIMANTAN TIMUR':14,'KALIMANTAN UTARA':15,'KEPULAUAN BANGKA BELITUNG':16
+, 'KEPULAUAN RIAU':17,'LAMPUNG':18,'MALUKU':19,'MALUKU UTARA':20,'NUSA TENGGARA BARAT':21,
+ 'NUSA TENGGARA TIMUR':22,'PAPUA':23,'PAPUA BARAT':24,'RIAU':25,'SULAWESI BARAT':26,
+ 'SULAWESI SELATAN':27,'SULAWESI TENGAH':28,'SULAWESI TENGGARA':29,'SULAWESI UTARA':30,
+ 'SUMATERA BARAT':31,'SUMATERA SELATAN':32,'SUMATERA UTARA':33},regex=True)
+df['fish'] = df['Jenis_Ikan'].replace({'BAWAL':0,'CAKALANG':1,'CUCUT':2,'CUMI-CUMI':3,'KAKAP':4,'KERAPU':5,'LAYANG':6,
+ 'RAJUNGAN':7,'TONGKOL':8,'TUNA':10},regex=True)
+df.drop(['Jenis_Ikan', 'Provinsi','peak_month_start','peak_month_end','Unnamed: 8','Tahun'], axis=1, inplace=True)
+X = df[['Volume_Produksi(TON)','Nilai_Produksi(Rupiah)','height','width','month_peak_start','month_peak_end','fish']]
+y = df['province']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(max_length)),
+    tf.keras.layers.Dense(40,activation='sigmoid'),
+    tf.keras.layers.Dense(3,activation='sigmoid')
+
+])
+
+METRICS = [
+    tf.keras.metrics.BinaryAccuracy(name='accuracy'),
+    tf.keras.metrics.Precision(name='precision'),
+    tf.keras.metrics.Recall(name='recall')
+]
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=METRICS)
